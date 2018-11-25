@@ -1,7 +1,10 @@
 package pl.szymonhanzel.alarmeserver;
 
 
+import com.google.cloud.firestore.QueryDocumentSnapshot;
 import pl.szymonhanzel.alarmeserver.services.FirestoreDatabaseService;
+
+import java.util.List;
 
 public class App {
 
@@ -16,5 +19,8 @@ public class App {
         } else {
             System.out.println("Connection failed");
         }
+
+        List<QueryDocumentSnapshot> listOfElements = FirestoreDatabaseService.getInstance().getDocuments("alarms");
+        System.out.println(listOfElements.size());
     }
 }
