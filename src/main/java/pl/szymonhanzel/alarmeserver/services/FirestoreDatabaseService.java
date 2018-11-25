@@ -33,11 +33,19 @@ public class FirestoreDatabaseService {
             }
             if(queryDocumentSnapshots!= null && !queryDocumentSnapshots.isEmpty()){
                 for(DocumentChange dc: queryDocumentSnapshots.getDocumentChanges()){
-                    Alarm alarm = null;
+                   
+                    Alarm alarm = new Alarm();
                     switch (dc.getType()) {
                         case ADDED:
-                            if(FirebaseDataAnalyzer.validateMap(dc.getDocument().getData())){
+                            if(FirestoreDataAnalyzer.validateMap(dc.getDocument().getData())){
+                                QueryDocumentSnapshot ds = dc.getDocument();
                                //TODO: mapowanie danych na obiekt reprezentujacy alarm
+                                alarm.setVehicleType(String.valueOf(ds.get("vehicleType")));
+                                alarm.setTimestamp(ds.getTimestamp("timestamp"));
+                                alarm.setAltitude(ds.getDouble("altitude"));
+                                alarm.setLatitude(ds.getDouble("latitude"));
+                                alarm.setLongitude(ds.getDouble("longitude"));
+                                FirestoreDataAnalyzer.findDevices(alarm);
                             }
                             break;
                     }
