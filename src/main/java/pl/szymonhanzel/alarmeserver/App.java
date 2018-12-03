@@ -22,5 +22,7 @@ public class App {
 
         List<QueryDocumentSnapshot> listOfElements = FirestoreDatabaseService.getInstance().getDocuments("alarms");
         System.out.println(listOfElements.size());
+
+        FirestoreDatabaseService.getInstance().setListener();
     }
 }

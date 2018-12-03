@@ -2,26 +2,18 @@ package pl.szymonhanzel.alarmeserver.models;
 
 import com.google.cloud.Timestamp;
 
-public class Alarm {
+/**
+ * Klasa POJO reprezentująca pojedyncze urządzenie, które może zostać powiadomione
+ */
+public class User {
 
-    private String vehicleType;
     private Timestamp timestamp;
     private double latitude;
     private double longitude;
     private double altitude;
+    private String token;
 
-    /**
-     * Klasa POJO reprezentująca alarm
-     */
-    public Alarm(){}
-
-
-    public String getVehicleType() {
-        return vehicleType;
-    }
-
-    public void setVehicleType(String vehicleType) {
-        this.vehicleType = vehicleType;
+    public User() {
     }
 
     public Timestamp getTimestamp() {
@@ -46,6 +38,14 @@ public class Alarm {
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public double getAltitude() {
