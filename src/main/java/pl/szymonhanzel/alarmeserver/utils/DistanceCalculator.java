@@ -1,4 +1,4 @@
-package pl.szymonhanzel.alarmeserver.services;
+package pl.szymonhanzel.alarmeserver.utils;
 
 public class DistanceCalculator {
 

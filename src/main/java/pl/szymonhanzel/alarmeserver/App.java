@@ -2,14 +2,20 @@ package pl.szymonhanzel.alarmeserver;
 
 
 import com.google.cloud.firestore.QueryDocumentSnapshot;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import pl.szymonhanzel.alarmeserver.services.FirestoreDatabaseService;
 
 import java.util.List;
 
+
+@SpringBootApplication
 public class App {
 
     public static void main(String[] args) {
         initalizeApp();
+        SpringApplication.run(App.class,args);
+
     }
 
     private static void initalizeApp() {
@@ -25,4 +31,6 @@ public class App {
 
         FirestoreDatabaseService.getInstance().setListener();
     }
+
+
 }

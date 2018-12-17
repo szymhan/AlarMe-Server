@@ -1,7 +1,8 @@
-package pl.szymonhanzel.alarmeserver.services;
+package pl.szymonhanzel.alarmeserver.utils;
 
 import pl.szymonhanzel.alarmeserver.models.Alarm;
 import pl.szymonhanzel.alarmeserver.models.User;
+import pl.szymonhanzel.alarmeserver.services.FirestoreDatabaseService;
 
 import java.util.ArrayList;
 import java.util.Arrays;

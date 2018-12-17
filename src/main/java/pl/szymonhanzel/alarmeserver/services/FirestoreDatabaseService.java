@@ -6,6 +6,7 @@ import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.*;
 import pl.szymonhanzel.alarmeserver.models.Alarm;
 import pl.szymonhanzel.alarmeserver.models.User;
+import pl.szymonhanzel.alarmeserver.utils.*;
 
 
 import javax.annotation.Nullable;
@@ -85,11 +86,6 @@ public class FirestoreDatabaseService {
         try {
             InputStream serviceAccount = new FileInputStream("alarme-hanzel-credentials.json");
             GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccount);
-           /* FirebaseOptions options = new FirebaseOptions.Builder()
-                    .setCredentials(credentials)
-                    .build();
-            FirebaseApp.initializeApp(options);
-            db = FirestoreClient.getFirestore();*/
             FirestoreOptions options =
                     FirestoreOptions
                             .newBuilder()
