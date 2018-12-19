@@ -60,7 +60,9 @@ public class FirestoreNotificationService {
         try {
             // Send a message to the device corresponding to the provided
             // registration token.
-            String response = FirebaseMessaging.getInstance().send(message);
+            FirebaseMessaging messaging = FirebaseMessaging.getInstance();
+            System.out.println(messaging.toString());
+            String response = messaging.send(message);
             // Response is a message ID string.
             System.out.println("Successfully sent message: " + response);
         } catch (FirebaseMessagingException fme){

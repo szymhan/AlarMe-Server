@@ -5,6 +5,9 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.*;
 import com.google.cloud.firestore.EventListener;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.messaging.FirebaseMessaging;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.szymonhanzel.alarmeserver.models.Alarm;
@@ -16,6 +19,7 @@ import javax.annotation.Nullable;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -52,6 +56,10 @@ public class FirestoreDatabaseService {
                                 QueryDocumentSnapshot ds = dc.getDocument();
                                 Map<String,Object> documentSnapshotMap = ds.getData();
                                 try {
+                                    long timestampSeconds = Timestamp.now().getSeconds()-15;
+                                    if(Timestamp.of(ds.getTimestamp("timestamp").toDate()).getSeconds()<timestampSeconds)
+                                        break;
+                                    System.out.println("FirestoreDatabaseService: Going to add new alarm to become released");
                                     alarm.setVehicleType(String.valueOf(documentSnapshotMap.get("vehicleType")));
                                     alarm.setTimestamp(ds.getTimestamp("timestamp"));
                                     alarm.setAltitude(Double.parseDouble(documentSnapshotMap.get("altitude").toString()));
@@ -91,6 +99,12 @@ public class FirestoreDatabaseService {
                             .setCredentials(credentials)
                             .setTimestampsInSnapshotsEnabled(true).build();
             db = options.getService();
+            FirebaseOptions firebaseOptions = new FirebaseOptions.Builder()
+                    .setCredentials(credentials)
+                    .build();
+            FirebaseApp.initializeApp(firebaseOptions);
+            FirebaseMessaging messaging = FirebaseMessaging.getInstance();
+            messaging.toString();
             return true;
         } catch (IOException nsfe) {
             logger.log(Level.ALL, "Cannot found the credentials JSON file. Please check if the file physically exists.");
