@@ -1,5 +1,7 @@
 package pl.szymonhanzel.alarmeserver.utils;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import pl.szymonhanzel.alarmeserver.models.Alarm;
 import pl.szymonhanzel.alarmeserver.models.User;
 import pl.szymonhanzel.alarmeserver.services.FirestoreDatabaseService;
@@ -9,7 +11,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+@Component
 public class FirestoreDataAnalyzer {
+
+    @Autowired
+    private FirestoreDatabaseService firestoreDatabaseService;
+    @Autowired
+    private DistanceCalculator distanceCalculator;
 
     private static final List<String> VEHICLE_TYPES = Arrays.asList("Straż pożarna", "Policja", "Pogotowie","Transport krwi");
     private static final String ALTITUDE = "altitude";
@@ -26,7 +34,7 @@ public class FirestoreDataAnalyzer {
      * @param map
      * @return
      */
-    public static boolean validateMap(Map<String,Object> map) {
+    public  boolean validateMap(Map<String,Object> map) {
         if(map.containsKey(ALTITUDE)
                 && map.containsKey(VEHICLE)
                 && map.containsKey(TIMESTAMP)
@@ -49,7 +57,7 @@ public class FirestoreDataAnalyzer {
      * @param map - mapa wszystkich kluczów danego użytkownika
      * @return
      */
-    public static boolean validateUser(Map<String,Object> map) {
+    public  boolean validateUser(Map<String,Object> map) {
         if (map.containsKey(TOKEN)
         && map.containsKey(TIMESTAMP)
         && map.containsKey(LATITUDE)
@@ -68,11 +76,11 @@ public class FirestoreDataAnalyzer {
      * @param alarm - zgłoszony alarm
      * @return - lista tokenów urządzeń, które mają zostać powiadomione
      */
-    public static List<String> findDevicesToNotify(Alarm alarm){
+    public  List<String> findDevicesToNotify(Alarm alarm){
         List <String> tokenList = new ArrayList<>();
-        List <User> listOfActiveUsers = FirestoreDatabaseService.getInstance().getActiveUsers();
+        List <User> listOfActiveUsers = firestoreDatabaseService.getActiveUsers();
         for (User user : listOfActiveUsers){
-           double distance = DistanceCalculator.distance(
+           double distance = distanceCalculator.distance(
                        user.getLatitude(),
                        alarm.getLatitude(),
                        user.getLongitude(),

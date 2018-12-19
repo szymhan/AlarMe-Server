@@ -3,12 +3,15 @@ package pl.szymonhanzel.alarmeserver.services;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
+import org.springframework.stereotype.Service;
 import pl.szymonhanzel.alarmeserver.models.Alarm;
 
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+
+@Service
 public class FirestoreNotificationService {
 
     private static final String ALTITUDE = "altitude";
@@ -26,7 +29,7 @@ public class FirestoreNotificationService {
      * @param alarm
      * @return
      */
-    public static boolean notifyUsers(List<String> userTokens, Alarm alarm){
+    public  boolean notifyUsers(List<String> userTokens, Alarm alarm){
 
         if(userTokens.size()> 0){
             for (String token : userTokens) {
@@ -45,7 +48,7 @@ public class FirestoreNotificationService {
      *              dane są przekazywane do wiadomości (message) za pomocą metod putData(klucz,wartość)
      * @return - zwraca wartość logiczną informującą, czy udało się wysłać wiadomość
      */
-    private static boolean sendMessageToUser (String token,Alarm alarm){
+    private  boolean sendMessageToUser (String token,Alarm alarm){
         // See documentation on defining a message payload.
         Message message = Message.builder()
                 .putData(VEHICLE, alarm.getVehicleType())
@@ -62,6 +65,7 @@ public class FirestoreNotificationService {
             System.out.println("Successfully sent message: " + response);
         } catch (FirebaseMessagingException fme){
             logger.log(Level.ALL,TAG + ": Operacja wysłania Cloud Message nie powiodła się.");
+            System.out.println("Message didn't sent ");
             return false;
         }
 

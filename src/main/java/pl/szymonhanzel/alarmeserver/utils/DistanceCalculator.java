@@ -1,5 +1,8 @@
 package pl.szymonhanzel.alarmeserver.utils;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class DistanceCalculator {
 
     /**
@@ -11,7 +14,7 @@ public class DistanceCalculator {
      * el2 End altitude in meters
      * @returns Distance in Meters
      */
-    public static double distance(double lat1, double lat2, double lon1,
+    public  double distance(double lat1, double lat2, double lon1,
                                   double lon2, double el1, double el2) {
 
         final int R = 6371; // Radius of the earth

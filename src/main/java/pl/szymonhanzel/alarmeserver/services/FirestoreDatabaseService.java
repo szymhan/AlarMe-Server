@@ -4,6 +4,9 @@ import com.google.api.core.ApiFuture;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.*;
+import com.google.cloud.firestore.EventListener;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import pl.szymonhanzel.alarmeserver.models.Alarm;
 import pl.szymonhanzel.alarmeserver.models.User;
 import pl.szymonhanzel.alarmeserver.utils.*;
@@ -13,20 +16,22 @@ import javax.annotation.Nullable;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
+@Service
 public class FirestoreDatabaseService {
 
-    public static final String TAG = "FireStoreDatabaseService";
+    @Autowired
+    private FirestoreDataAnalyzer firestoreDataAnalyzer;
+    @Autowired
+    private FirestoreNotificationService notificationService;
+
+    private static final String TAG = "FireStoreDatabaseService";
     private static Firestore db;
-    private static final FirestoreDatabaseService instance = new FirestoreDatabaseService();
-    private static final long SECONDS = 120l;
+    private static final long SECONDS = 180l;
     private static final String USERS_COLLECTION = "users";
     private static final Logger  logger = Logger.getAnonymousLogger();
 
@@ -38,24 +43,24 @@ public class FirestoreDatabaseService {
                 return;
             }
             if(queryDocumentSnapshots!= null && !queryDocumentSnapshots.isEmpty()){
-                for(DocumentChange dc: queryDocumentSnapshots.getDocumentChanges()){
+                 for(DocumentChange dc: queryDocumentSnapshots.getDocumentChanges()){
 
                     switch (dc.getType()) {
                         case ADDED:
-                            
-                            Alarm alarm = new Alarm();
-                            if(FirestoreDataAnalyzer.validateMap(dc.getDocument().getData())){
+                            if(firestoreDataAnalyzer.validateMap(dc.getDocument().getData())){
+                                Alarm alarm = new Alarm();
                                 QueryDocumentSnapshot ds = dc.getDocument();
+                                Map<String,Object> documentSnapshotMap = ds.getData();
                                 try {
-                                    alarm.setVehicleType(String.valueOf(ds.get("vehicleType")));
+                                    alarm.setVehicleType(String.valueOf(documentSnapshotMap.get("vehicleType")));
                                     alarm.setTimestamp(ds.getTimestamp("timestamp"));
-                                    alarm.setAltitude(ds.getDouble("altitude"));
-                                    alarm.setLatitude(ds.getDouble("latitude"));
-                                    alarm.setLongitude(ds.getDouble("longitude"));
+                                    alarm.setAltitude(Double.parseDouble(documentSnapshotMap.get("altitude").toString()));
+                                    alarm.setLatitude(Double.parseDouble(documentSnapshotMap.get("latitude").toString()));
+                                    alarm.setLongitude(Double.parseDouble(documentSnapshotMap.get("longitude").toString()));
                                     //TODO: wyszukanie urzadzeń do powiadomienia
-                                   List<String> tokensToNotify =  FirestoreDataAnalyzer.findDevicesToNotify(alarm);
+                                   List<String> tokensToNotify =  firestoreDataAnalyzer.findDevicesToNotify(alarm);
                                     //TODO: powiadomienie urządzeń
-                                    FirestoreNotificationService.notifyUsers(tokensToNotify,alarm);
+                                    notificationService.notifyUsers(tokensToNotify,alarm);
                                 } catch (NullPointerException npe) {
                                     logger.log(Level.ALL, "Mapping from DocumentSnapshot to Alarm failed. " +
                                             "Probably something in Snapshot is missing.");
@@ -69,16 +74,10 @@ public class FirestoreDatabaseService {
         }
     };
 
-    private FirestoreDatabaseService() {
-    }
-
-    public static FirestoreDatabaseService getInstance() {
-        return instance;
-    }
 
 
     /**
-     * metoda zestawiająca połączenie z bazą Google Cloud Platform - Firestore
+     * metoda zestawiająca połączenie z bazą NoSQL Google Cloud Platform - Firestore
      * @return
      */
     public  boolean setConnection() {
@@ -124,18 +123,19 @@ public class FirestoreDatabaseService {
         } catch (InterruptedException | ExecutionException ee){
             logger.log(Level.ALL,"Unable to execute query.");
             return Collections.emptyList();
-        }
+         }
+
         }
 
     /**
      * Metoda zwracająca listę wszystkich użytkowników, którzy byli aktywni w przeciągu ostatnich
-     * 120 sekund.
+     * SECONDS  sekund.
      * @return
      */
     public List<User> getActiveUsers(){
         try{
             // asynchronously retrieve all users
-            // aktualny Timestamp pomniejszony o 120 sekund
+            // aktualny Timestamp pomniejszony o 180 sekund
             long now = Timestamp.now().getSeconds() - SECONDS ;
             Timestamp timestampToCompare = Timestamp.ofTimeSecondsAndNanos(now,0);
             ApiFuture<QuerySnapshot> query = db.collection(USERS_COLLECTION).whereGreaterThan("timestamp",timestampToCompare).get();
@@ -160,8 +160,9 @@ public class FirestoreDatabaseService {
     private List<User> convertToUserList(List<QueryDocumentSnapshot> documentList) {
         List<User> returnList = new ArrayList<>();
         if(documentList.size() >0){
+            Set<String> tokens = new HashSet<>();
             for (DocumentSnapshot dc: documentList) {
-                if(FirestoreDataAnalyzer.validateUser(dc.getData())){
+                if(firestoreDataAnalyzer.validateUser(dc.getData()) && !tokens.contains(dc.getString("token"))){
                     try {
                         User user = new User();
                         user.setToken(dc.getString("token"));
@@ -169,6 +170,8 @@ public class FirestoreDatabaseService {
                         user.setLongitude(dc.getDouble("longitude"));
                         user.setAltitude(dc.getDouble("altitude"));
                         user.setTimestamp(dc.getTimestamp("timestamp"));
+                        //dodanie tokena do kolekcji, aby uniknąć tego samego użytkownika dla jednego alarmu
+                        tokens.add(dc.getString("token"));
                         returnList.add(user);
                     } catch (Exception e){
                         logger.log(Level.ALL, TAG + ": Cannot add data to User List");
