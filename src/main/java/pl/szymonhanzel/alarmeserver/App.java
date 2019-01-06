@@ -30,14 +30,15 @@ public class App {
         System.out.println("Initalizing app...");
         if(firestoreDatabaseService.setConnection()){
             System.out.println("Connected successfully");
+
+            List<QueryDocumentSnapshot> listOfElements = firestoreDatabaseService.getDocuments("alarms");
+            System.out.println(listOfElements.size());
+
+            firestoreDatabaseService.setListener();
         } else {
             System.out.println("Connection failed");
+            System.exit(0);
         }
-
-        List<QueryDocumentSnapshot> listOfElements = firestoreDatabaseService.getDocuments("alarms");
-        System.out.println(listOfElements.size());
-
-        firestoreDatabaseService.setListener();
     }
 
 

@@ -19,7 +19,6 @@ public class FirestoreDataAnalyzer {
     @Autowired
     private DistanceCalculator distanceCalculator;
 
-    private static final List<String> VEHICLE_TYPES = Arrays.asList("Straż pożarna", "Policja", "Pogotowie","Transport krwi");
     private static final String ALTITUDE = "altitude";
     private static final String LONGITUDE = "longitude";
     private static final String LATITUDE = "latitude";
@@ -40,12 +39,7 @@ public class FirestoreDataAnalyzer {
                 && map.containsKey(TIMESTAMP)
                 && map.containsKey(LONGITUDE)
                 && map.containsKey(LATITUDE)){
-            if(VEHICLE_TYPES.contains(String.valueOf(map.get(VEHICLE)))){
                 return true;
-            } else {
-                return false;
-            }
-
         } else {
             return false;
         }

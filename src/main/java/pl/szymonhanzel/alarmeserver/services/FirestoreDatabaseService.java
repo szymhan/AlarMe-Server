@@ -35,7 +35,7 @@ public class FirestoreDatabaseService {
 
     private static final String TAG = "FireStoreDatabaseService";
     private static Firestore db;
-    private static final long SECONDS = 180l;
+    private static final long SECONDS = 120l;
     private static final String USERS_COLLECTION = "users";
     private static final Logger  logger = Logger.getAnonymousLogger();
 
@@ -149,7 +149,7 @@ public class FirestoreDatabaseService {
     public List<User> getActiveUsers(){
         try{
             // asynchronously retrieve all users
-            // aktualny Timestamp pomniejszony o 180 sekund
+            // aktualny Timestamp pomniejszony o 120 sekund
             long now = Timestamp.now().getSeconds() - SECONDS ;
             Timestamp timestampToCompare = Timestamp.ofTimeSecondsAndNanos(now,0);
             ApiFuture<QuerySnapshot> query = db.collection(USERS_COLLECTION).whereGreaterThan("timestamp",timestampToCompare).get();

@@ -37,7 +37,7 @@ public class FirestoreNotificationService {
             }
             return true;
         } else {
-            return true;
+            return false;
         }
     }
 
